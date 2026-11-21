@@ -1,6 +1,6 @@
 # Minecraft-JavaSwing
 
-Um protótipo funcional de um jogo de blocos 3D estilo **Minecraft Alpha / Infdev**, desenvolvido inteiramente em **Java puro** utilizando apenas as bibliotecas nativas `Swing` e `AWT`, sem depender de motores externos ou OpenGL/LWJGL.
+Um protótipo funcional de um jogo de blocos 3D estilo **Minecraft Alpha**, desenvolvido inteiramente em **Java puro** utilizando apenas as bibliotecas nativas `Swing` e `AWT`, sem depender de motores externos ou OpenGL/LWJGL.
 
 ---
 
