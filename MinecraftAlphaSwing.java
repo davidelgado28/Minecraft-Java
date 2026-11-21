@@ -7,17 +7,12 @@ import java.util.Random;
 
 public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener {
 
-    // Resolução interna (baixa para manter alto FPS no renderizador via CPU)
     private static final int WIDTH = 480;
     private static final int HEIGHT = 300;
     private static final int SCALE = 2;
-
-    // Dimensões do Mundo (X, Y = altura, Z)
     private static final int WORLD_X = 64;
     private static final int WORLD_Y = 32;
     private static final int WORLD_Z = 64;
-
-    // IDs dos Blocos
     private static final byte AIR = 0;
     private static final byte GRASS = 1;
     private static final byte DIRT = 2;
@@ -25,20 +20,15 @@ public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener
     private static final byte WOOD = 4;
     private static final byte LEAVES = 5;
     private static final byte COBBLESTONE = 6;
-
     private final byte[][][] world = new byte[WORLD_X][WORLD_Y][WORLD_Z];
     private final BufferedImage screen;
     private final int[] pixels;
-
-    // Estado do Jogador
     private double posX = 32.5, posY = 22.0, posZ = 32.5;
     private double velY = 0;
-    private double yaw = 0;   // Rotação horizontal
-    private double pitch = 0; // Rotação vertical
+    private double yaw = 0;   
+    private double pitch = 0; 
     private boolean onGround = false;
     private byte selectedBlock = COBBLESTONE;
-
-    // Controles
     private final boolean[] keys = new boolean[256];
     private Robot robot;
     private boolean mouseLocked = false;
@@ -62,8 +52,6 @@ public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener
             e.printStackTrace();
         }
     }
-
-    // Geração de terreno estilo Minecraft Alpha (colinas e árvores)
     private void generateWorld() {
         Random rand = new Random(1337);
         double seed1 = rand.nextDouble() * 100;
@@ -71,7 +59,6 @@ public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener
 
         for (int x = 0; x < WORLD_X; x++) {
             for (int z = 0; z < WORLD_Z; z++) {
-                // Combinação simples de senos/cossenos para simular terreno ondulado
                 double h = 10
                         + Math.sin(x * 0.12 + seed1) * 3.0
                         + Math.cos(z * 0.12 + seed2) * 3.0
@@ -87,8 +74,6 @@ public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener
                         world[x][y][z] = STONE;
                     }
                 }
-
-                // Gerar árvores simples aleatoriamente
                 if (x > 3 && x < WORLD_X - 4 && z > 3 && z < WORLD_Z - 4 && rand.nextInt(45) == 0) {
                     buildTree(x, height + 1, z);
                 }
@@ -114,8 +99,6 @@ public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener
             }
         }
     }
-
-    // Loop Principal
     @Override
     public void run() {
         long lastTime = System.nanoTime();
@@ -140,8 +123,6 @@ public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener
             } catch (InterruptedException ignored) {}
         }
     }
-
-    // Física, colisão e movimentação
     private void updatePlayer() {
         double speed = 0.11;
         double sin = Math.sin(yaw);
@@ -172,18 +153,14 @@ public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener
             moveX = (moveX / len) * speed;
             moveZ = (moveZ / len) * speed;
         }
-
-        // Colisão horizontal (caixa delimitadora simples do jogador)
         if (!collides(posX + moveX, posY, posZ)) posX += moveX;
         if (!collides(posX, posY, posZ + moveZ)) posZ += moveZ;
-
-        // Pulo e Gravidade
         if (keys[KeyEvent.VK_SPACE] && onGround) {
             velY = 0.23;
             onGround = false;
         }
 
-        velY -= 0.015; // Gravidade
+        velY -= 0.015; 
         if (!collides(posX, posY + velY, posZ)) {
             posY += velY;
             onGround = false;
@@ -191,8 +168,6 @@ public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener
             if (velY < 0) onGround = true;
             velY = 0;
         }
-
-        // Evitar cair para fora do mapa
         if (posY < 1) {
             posY = 25;
             velY = 0;
@@ -200,8 +175,8 @@ public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener
     }
 
     private boolean collides(double x, double y, double z) {
-        double r = 0.28; // Raio do corpo do jogador
-        double h = 1.65; // Altura do jogador
+        double r = 0.28; 
+        double h = 1.65; 
 
         for (double dx : new double[]{-r, r}) {
             for (double dz : new double[]{-r, r}) {
@@ -222,68 +197,51 @@ public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener
         }
         return world[x][y][z];
     }
-
-    // Motor Gráfico 3D via Raycasting (Algoritmo DDA 3D)
     private void renderWorld() {
         double eyeX = posX;
-        double eyeY = posY + 1.5; // Altura dos olhos
+        double eyeY = posY + 1.5; 
         double eyeZ = posZ;
-
         double cosYaw = Math.cos(yaw);
         double sinYaw = Math.sin(yaw);
         double cosPitch = Math.cos(pitch);
         double sinPitch = Math.sin(pitch);
-
-        // Bloco atualmente mirado pelo centro da tela
         int[] target = raycast(eyeX, eyeY, eyeZ, sinYaw * cosPitch, sinPitch, cosYaw * cosPitch, 6.0);
-
-        int skyColor = 0x87CEEB; // Azul clássico do céu Alpha
+        int skyColor = 0x87CEEB; 
 
         for (int py = 0; py < HEIGHT; py++) {
             double v = (HEIGHT / 2.0 - py) / (HEIGHT * 0.75);
 
             for (int px = 0; px < WIDTH; px++) {
                 double u = (px - WIDTH / 2.0) / (HEIGHT * 0.75);
-
-                // Direção do raio no espaço da câmera
                 double rx = u;
                 double ry = v;
                 double rz = 1.0;
-
-                // Rotação Pitch (eixo X)
                 double ry1 = ry * cosPitch + rz * sinPitch;
                 double rz1 = -ry * sinPitch + rz * cosPitch;
                 double dx = rx * cosYaw + rz1 * sinYaw;
                 double dy = ry1;
                 double dz = -rx * sinYaw + rz1 * cosYaw;
-
                 double invLen = 1.0 / Math.sqrt(dx * dx + dy * dy + dz * dz);
                 dx *= invLen;
                 dy *= invLen;
                 dz *= invLen;
-
                 pixels[py * WIDTH + px] = traceRay(eyeX, eyeY, eyeZ, dx, dy, dz, skyColor, target);
             }
         }
     }
-
     private int traceRay(double ox, double oy, double oz, double dx, double dy, double dz, int skyColor, int[] target) {
         int mapX = (int) Math.floor(ox);
         int mapY = (int) Math.floor(oy);
         int mapZ = (int) Math.floor(oz);
-
         double deltaDistX = (dx == 0) ? 1e30 : Math.abs(1.0 / dx);
         double deltaDistY = (dy == 0) ? 1e30 : Math.abs(1.0 / dy);
         double deltaDistZ = (dz == 0) ? 1e30 : Math.abs(1.0 / dz);
-
         int stepX = (dx < 0) ? -1 : 1;
         int stepY = (dy < 0) ? -1 : 1;
         int stepZ = (dz < 0) ? -1 : 1;
-
         double sideDistX = (dx < 0) ? (ox - mapX) * deltaDistX : (mapX + 1.0 - ox) * deltaDistX;
         double sideDistY = (dy < 0) ? (oy - mapY) * deltaDistY : (mapY + 1.0 - oy) * deltaDistY;
         double sideDistZ = (dz < 0) ? (oz - mapZ) * deltaDistZ : (mapZ + 1.0 - oz) * deltaDistZ;
-
         int side = 0; 
         double dist = 0;
         double maxDist = 36.0; 
@@ -326,6 +284,7 @@ public class MinecraftAlphaSwing extends JPanel implements Runnable, KeyListener
                   double sideDistZ = (dz < 0) ? (oz - mapZ) * deltaDistZ : (mapZ + 1.0 - oz) * deltaDistZ;
                   int nx = 0, ny = 0, nz = 0;
                   double dist = 0;
+            
         while (dist < maxDist) {
             if (sideDistX < sideDistY) {
               if (sideDistX < sideDistZ) {
