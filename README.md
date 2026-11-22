@@ -40,11 +40,11 @@ Assim que a janela do jogo abrir, **clique no centro da tela** para capturar o c
 
 Use as teclas numéricas para escolher o material de construção (o bloco ativo aparece no canto superior esquerdo da tela):
 
-* **`1`** — **Pedregulho** (*Cobblestone*)
-* **`2`** — **Grama** (*Grass*)
-* **`3`** — **Terra** (*Dirt*)
-* **`4`** — **Pedra** (*Stone*)
-* **`5`** — **Madeira** (*Wood*)
+* **`1`** —> **Pedregulho** (*Cobblestone*)
+* **`2`** —> **Grama** (*Grass*)
+* **`3`** —> **Terra** (*Dirt*)
+* **`4`** —> **Pedra** (*Stone*)
+* **`5`** —> **Madeira** (*Wood*)
 
 ---
 
